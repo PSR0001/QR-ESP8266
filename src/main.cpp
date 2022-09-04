@@ -27,10 +27,9 @@ const char HTTP_END[] PROGMEM = "</div></body></html>";
 // "/W" === WIFI SETUP
 // "/q" === QR CODE
 
-
-String ssid = "";
-String password = "";
-
+String ssid;
+String password;
+bool connect=0;
 // ESP Server
 ESP8266WebServer server(80);
 
@@ -49,39 +48,53 @@ void dnsStart();
 void handleQr();
 void handleWifiDetails();
 
-
-
 void setup()
 {
+  
   delay(1000);
   Serial.begin(115200);
   dnsStart();
   serverRoute();
+  
 }
 
-void connectWifi()
+byte connectWifi()
 {
   Serial.println(F("Connecting as wifi client..."));
   WiFi.disconnect();
+
+  WiFi.mode(WIFI_AP_STA);
   WiFi.begin(ssid, password);
-  int connRes = WiFi.waitForConnectResult();
-  Serial.print("connRes: ");
-  Serial.println(connRes);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+  }
+  if (WiFi.status() == WL_CONNECTED)
+    return true;
+  else
+    return false;
 }
 
 void loop()
 {
 
-  // Do work:
+
   // DNS
   dnsServer.processNextRequest();
   // HTTP
   server.handleClient();
+  
+
+
+
+
 }
 
-void dnsStart(){
-    Serial.println(F("Configuring access point..."));
-
+void dnsStart()
+{
+  Serial.println(F("Configuring access point..."));
+  WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(apIP, apIP, netMsk);
   WiFi.softAP(clientId);
   delay(500); // !important
@@ -93,8 +106,7 @@ void dnsStart(){
   dnsServer.setTTL(300);
   // Setup the DNS server redirecting all the domains to the apIP
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-  dnsServer.start(DNS_PORT, "www.espqr.com", apIP);
-  
+  dnsServer.start(DNS_PORT, "www.espqrwifi.com", apIP);
 }
 
 void serverRoute()
@@ -102,11 +114,10 @@ void serverRoute()
   server.on("/", handleRoot);
   server.on("/w", handleWifi);
   server.on("/q", handleQr);
-  server.on("/s", handleWifiDetails);  
-  server.on("/fwlink", handleRoot);        
+  server.on("/s", handleWifiDetails);
+  server.on("/f", handleRoot);
   server.onNotFound(handleRoot);
   server.begin(); // Web server start
-  Serial.println(F("HTTP server started"));
 }
 
 void handleRoot()
@@ -152,67 +163,17 @@ void handleQr()
   server.send(200, "text/html", page);
 }
 
-void handleWifiDetails(){
+void handleWifiDetails()
+{
 
-
-  //SAVE/connect here
+  // SAVE/connect here
   ssid = server.arg("s").c_str();
   password = server.arg("p").c_str();
 
-
-
-Serial.println(ssid);
-Serial.println(password);
-  //parameters
-  // for (int i = 0; i < _paramsCount; i++) {
-  //   // if (_params[i] == NULL) {
-  //   //   break;
-  //   // }
-  //   //read parameter
-  //   String value = server.arg(_params[i]->getID()).c_str();
-  //   //store it in array
-  //   value.toCharArray(_params[i]->_value, _params[i]->_length + 1);
-  //   Serial.println(F("Parameter"));
-  //   Serial.print(_params[i]->getID());
-  //   Serial.print(value);
-  // }
-
-  // if (server->arg("ip") != "") {
-  //   DEBUG_WM(F("static ip"));
-  //   DEBUG_WM(server->arg("ip"));
-  //   //_sta_static_ip.fromString(server->arg("ip"));
-  //   String ip = server->arg("ip");
-  //   optionalIPFromString(&_sta_static_ip, ip.c_str());
-  // }
-  // if (server->arg("gw") != "") {
-  //   DEBUG_WM(F("static gateway"));
-  //   DEBUG_WM(server->arg("gw"));
-  //   String gw = server->arg("gw");
-  //   optionalIPFromString(&_sta_static_gw, gw.c_str());
-  // }
-  // if (server->arg("sn") != "") {
-  //   DEBUG_WM(F("static netmask"));
-  //   DEBUG_WM(server->arg("sn"));
-  //   String sn = server->arg("sn");
-  //   optionalIPFromString(&_sta_static_sn, sn.c_str());
-  // }
-
-  String page = FPSTR(HTTP_HEADER);
-  page.replace("{v}", "Credentials Saved");
-  page += FPSTR(HTTP_STYLE);
-  page += FPSTR(HTTP_HEADER_END);
-  page += FPSTR(HTTP_END);
-
-  server.sendHeader("Content-Length", String(page.length()));
-  server.send(200, "text/html", page);
-
-  Serial.print(F("Sent wifi save page"));
-
-  //connect = true; //signal ready to connect/reset
-
-
-
-
+  if (connectWifi())
+  {
+    connect = true;
+  }
 }
 
 /** Handle the info page */
@@ -234,4 +195,3 @@ String allInfo()
   info += WiFi.macAddress();
   return info;
 }
-
