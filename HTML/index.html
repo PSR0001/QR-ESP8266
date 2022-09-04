@@ -35,6 +35,11 @@
 
 <style>body{text-align:center;font-family:verdana;}.a{max-width:350px;margin:auto}button{border:0;border-radius:5px;background-color:#0fe07b;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}input{padding:5px;font-size:1em;width:95%;}</style>
 
+<script src="//cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+
+<style>
+    #qrcode{width:160px;height:160px;margin-top:15px;}
+</style>
 <body>
     <script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</Script>
 
@@ -46,7 +51,7 @@
         <br><br>
         <a href="/q"><button>Scan QR</button></a>
     </div> -->
-    <div class="a">
+    <!-- <div class="a">
         <h2>QR Code | WiFi</h2>
         <hr>
         <form method='get'action='wifisave'>
@@ -56,9 +61,37 @@
             <br><br>
             <button type='submit'>save</button>
         </form>
+    </div> -->
+    <!-- <div class="a">
+        <h2>QR Code | WiFi</h2>
+        <hr>
+        Scan the QR code 
+        <img src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=fuck'alt="QR"/>
     </div>
+ -->
+ <input id="text" type="text" value="https://hogangnono.com" style="width:80%" /><br />
+ <div id="qrcode"></div>
+<script>
+    
+    var qrcode = new QRCode("qrcode");
+
+ 
+  
+  qrcode.makeCode("hello guys");
 
 
+
+
+// $("#text").
+//   on("blur", function () {
+//     makeCode();
+//   }).
+//   on("keydown", function (e) {
+//     if (e.keyCode == 13) {
+//       makeCode();
+//     }
+//   });
+</script>
 
 
 </body>
