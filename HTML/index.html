@@ -2,10 +2,61 @@
 <html lang="en">
 
 <head>
-    <title>Document</title>
+    <title>{t}</title>
 </head>
+<style>
+    body{text-align:center;
+        font-family: verdana;
+    }
+
+    .a {
+        max-width: 350px;
+        margin: auto
+    }
+
+    button {
+        border: 0;
+        border-radius: 5px;
+        background-color: #0fe07b;
+        color: #fff;
+        line-height: 2.4rem;
+        font-size: 1.2rem;
+        width: 100%;
+    }
+
+
+    input {
+        padding: 5px;
+        font-size: 1em;
+        width: 95%;
+    }
+
+</style>
+
+<style>body{text-align:center;font-family:verdana;}.a{max-width:350px;margin:auto}button{border:0;border-radius:5px;background-color:#0fe07b;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}input{padding:5px;font-size:1em;width:95%;}</style>
 
 <body>
+    <script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</Script>
+
+    <!-- <div class="a">
+        <h2>QR Code | WiFi</h2>
+        <hr>
+        <br>
+        <a href="/w"><button>Connect to WiFi</button></a>
+        <br><br>
+        <a href="/q"><button>Scan QR</button></a>
+    </div> -->
+    <div class="a">
+        <h2>QR Code | WiFi</h2>
+        <hr>
+        <form method='get'action='wifisave'>
+            <input id='s'name='s'length=32 placeholder='SSID'>
+            <br><br>
+            <input id='p' name='p' length=64 type='password' placeholder='Password'>
+            <br><br>
+            <button type='submit'>save</button>
+        </form>
+    </div>
 
 
 
@@ -13,4 +64,3 @@
 </body>
 
 </html>
-
