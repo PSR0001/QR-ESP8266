@@ -15,7 +15,7 @@ const char HTTP_STYLE[] PROGMEM = "<style>body{text-align:center;font-family:ver
 const char HTTP_SCRIPT[] PROGMEM = "";
 const char HTTP_HEADER_END[] PROGMEM = "</head><body><div class=\"a\">";
 const char HTTP_H1[] PROGMEM = "<h2>{h}</h2>";
-const char HTTP_MAIN_PAGE[] PROGMEM = "<hr><br><a href=\"/w\"><button>ConnecttoWiFi</button></a><br><br><a href=\"/q\"><button>ScanQR</button></a>";
+const char HTTP_MAIN_PAGE[] PROGMEM = "<hr><br><a href=\"/w\"><button>Connect to WiFi</button></a><br><br><a href=\"/q\"><button>Scan QR</button></a>";
 
 const char HTTP_FORM_START[] PROGMEM = "<hr><form method='get'action='/s'><input id='s'name='s'length=32 placeholder='SSID'><br><br><input id='p'name='p'length=64 type='password'placeholder='Password'><br><br><button type='submit'>save</button></form>";
 const char HTTP_QR_START[] PROGMEM = "";
@@ -28,8 +28,8 @@ const char HTTP_END[] PROGMEM = "</div></body></html>";
 // "/q" === QR CODE
 
 
-char ssid[33] = "";
-char password[65] = "";
+String ssid = "";
+String password = "";
 
 // ESP Server
 ESP8266WebServer server(80);
@@ -154,6 +154,61 @@ void handleQr()
 
 void handleWifiDetails(){
 
+
+  //SAVE/connect here
+  ssid = server.arg("s").c_str();
+  password = server.arg("p").c_str();
+
+
+
+Serial.println(ssid);
+Serial.println(password);
+  //parameters
+  // for (int i = 0; i < _paramsCount; i++) {
+  //   // if (_params[i] == NULL) {
+  //   //   break;
+  //   // }
+  //   //read parameter
+  //   String value = server.arg(_params[i]->getID()).c_str();
+  //   //store it in array
+  //   value.toCharArray(_params[i]->_value, _params[i]->_length + 1);
+  //   Serial.println(F("Parameter"));
+  //   Serial.print(_params[i]->getID());
+  //   Serial.print(value);
+  // }
+
+  // if (server->arg("ip") != "") {
+  //   DEBUG_WM(F("static ip"));
+  //   DEBUG_WM(server->arg("ip"));
+  //   //_sta_static_ip.fromString(server->arg("ip"));
+  //   String ip = server->arg("ip");
+  //   optionalIPFromString(&_sta_static_ip, ip.c_str());
+  // }
+  // if (server->arg("gw") != "") {
+  //   DEBUG_WM(F("static gateway"));
+  //   DEBUG_WM(server->arg("gw"));
+  //   String gw = server->arg("gw");
+  //   optionalIPFromString(&_sta_static_gw, gw.c_str());
+  // }
+  // if (server->arg("sn") != "") {
+  //   DEBUG_WM(F("static netmask"));
+  //   DEBUG_WM(server->arg("sn"));
+  //   String sn = server->arg("sn");
+  //   optionalIPFromString(&_sta_static_sn, sn.c_str());
+  // }
+
+  String page = FPSTR(HTTP_HEADER);
+  page.replace("{v}", "Credentials Saved");
+  page += FPSTR(HTTP_STYLE);
+  page += FPSTR(HTTP_HEADER_END);
+  page += FPSTR(HTTP_END);
+
+  server.sendHeader("Content-Length", String(page.length()));
+  server.send(200, "text/html", page);
+
+  Serial.print(F("Sent wifi save page"));
+
+  //connect = true; //signal ready to connect/reset
 
 
 
