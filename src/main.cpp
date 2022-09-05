@@ -10,20 +10,19 @@
 // Global variable
 String clientId = "ESP" + String(ESP.getChipId());
 
-const char HTTP_HEADER[] PROGMEM              = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{t}</title>";
-const char HTTP_STYLE[] PROGMEM               = "<style>#qrcode{width:160px;height:160px;margin-top:15px;}body{text-align:center;font-family:verdana;}.a{max-width:350px;margin:auto}button{border:0;border-radius:5px;background-color:#0fe07b;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}input{padding:5px;font-size:1em;width:95%;}</style>";
-const char HTTP_SCRIPT_START[] PROGMEM              = "<script>let qrcode = new QRCode(\"qrcode\"); qrcode.makeCode(\"";
-const char HTTP_SCRIPT_END[] PROGMEM              = "\");</script>";
-const char HTTP_HEADER_END[] PROGMEM          = "</head><body><div class=\"a\">";
-const char HTTP_H1[] PROGMEM                  = "<h2>{h}</h2>";
-const char HTTP_MAIN_PAGE[] PROGMEM           = "<hr><br><a href=\"/w\"><button>Connect to WiFi</button></a><br><br><a href=\"/q\"><button>Scan QR</button></a>";
-const char HTTP_SAVED[] PROGMEM               = "Credentials Saved";
-const char HTTP_FORM_START[] PROGMEM          = "<hr><form method='get'action='/s'><input id='s'name='s'length=32 placeholder='SSID'><br><br><input id='p'name='p'length=64 type='password'placeholder='Password'><br><br><button type='submit'>save</button></form>";
-const char HTTP_QR_START[] PROGMEM            = "<hr>Scan the QR code <img src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
-const char HTTP_QR_END[] PROGMEM              = "'alt='QR'/>";
-const char HTTP_QR_LIB[] PROGMEM              = "<div id=\"qrcode\"></div>";
-
-const char HTTP_END[] PROGMEM                 = "</div></body></html>";
+const char HTTP_HEADER[] PROGMEM                = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{t}</title>";
+const char HTTP_STYLE[] PROGMEM                 = "<style>#qrcode{width:160px;height:160px;margin-top:15px;}body{text-align:center;font-family:verdana;}.a{max-width:350px;margin:auto}button{border:0;border-radius:5px;background-color:#0fe07b;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}input{padding:5px;font-size:1em;width:95%;}</style>";
+const char HTTP_SCRIPT_START[] PROGMEM          = "<script>let qrcode = new QRCode(\"qrcode\"); qrcode.makeCode(\"";
+const char HTTP_SCRIPT_END[] PROGMEM            = "\");</script>";
+const char HTTP_HEADER_END[] PROGMEM            = "</head><body><div class=\"a\">";
+const char HTTP_H1[] PROGMEM                    = "<h2>{h}</h2>";
+const char HTTP_MAIN_PAGE[] PROGMEM             = "<hr><br><a href=\"/w\"><button>Connect to WiFi</button></a><br><br><a href=\"/q\"><button>Scan QR</button></a>";
+const char HTTP_SAVED[] PROGMEM                 = "Credentials Saved";
+const char HTTP_FORM_START[] PROGMEM            = "<hr><form method='get'action='/s'><input id='s'name='s'length=32 placeholder='SSID'><br><br><input id='p'name='p'length=64 type='password'placeholder='Password'><br><br><button type='submit'>save</button></form>";
+// const char HTTP_QR_START[] PROGMEM              = "<hr>Scan the QR code <img src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
+// const char HTTP_QR_END[] PROGMEM                = "'alt='QR'/>";
+const char HTTP_QR_LIB[] PROGMEM                = "<div id=\"qrcode\"></div>";
+const char HTTP_END[] PROGMEM                   = "</div></body></html>";
 
 // "/W" === WIFI SETUP
 // "/q" === QR CODE
@@ -79,17 +78,10 @@ byte connectWifi()
 
 void loop()
 {
-
-
   // DNS
   dnsServer.processNextRequest();
   // HTTP
   server.handleClient();
-  
-
-
-
-
 }
 
 void dnsStart()
@@ -107,7 +99,8 @@ void dnsStart()
   dnsServer.setTTL(300);
   // Setup the DNS server redirecting all the domains to the apIP
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-  dnsServer.start(DNS_PORT, "www.espqrwifi.com", apIP);
+  // dnsServer.start(DNS_PORT, "www.espqrwifi.com", apIP);
+  dnsServer.start(DNS_PORT, "*", apIP);
 }
 
 void serverRoute()
@@ -116,7 +109,7 @@ void serverRoute()
   server.on("/w", handleWifi);
   server.on("/q", handleQr);
   server.on("/s", handleWifiDetails);
-  server.on("/f", handleRoot);
+  //server.on("/f", handleRoot);
   server.onNotFound(handleRoot);
   server.begin(); // Web server start
 }
@@ -161,25 +154,19 @@ void handleQr()
   // page += FPSTR(HTTP_QR_START);
   // page += FPSTR(HTTP_QR_END);
   page += FPSTR(HTTP_QR_LIB);
-  page+="<script>";
   page +=FPSTR(QR_CODE);
-  page+="</script>";
   page+=FPSTR(HTTP_SCRIPT_START);
-  page += FPSTR("Hello I AM ESP8266");
   page+=A;
   page+=FPSTR(HTTP_SCRIPT_END);
-  
   page += FPSTR(HTTP_END);
 
   server.sendHeader("Content-Length", String(page.length()));
   server.send(200, "text/html", page);
-  
 }
 
 
 void handleWifiDetails()
 {
-
   // SAVE/connect here
   ssid = server.arg("s").c_str();
   password = server.arg("p").c_str();
@@ -190,12 +177,8 @@ void handleWifiDetails()
   page += FPSTR(HTTP_HEADER_END);
   page += FPSTR(HTTP_SAVED);
   page += FPSTR(HTTP_END);
-
   server.sendHeader("Content-Length", String(page.length()));
   server.send(200, "text/html", page);
-
-
-
   if (connectWifi())
   {
     connect = true;
@@ -206,18 +189,18 @@ void handleWifiDetails()
 String allInfo()
 {
   String info = "";
-  info += ESP.getChipId();
-  info += " ";
+  info += String(ESP.getChipId()).c_str();
+  info += "\n";
   info += ESP.getFlashChipId();
-  info += " "; 
+  info += "\n"; 
   info += ESP.getFlashChipSize();
-  info += " ";
+  info += "\n";
   info += ESP.getFlashChipRealSize();
-  info += " ";
+  info += "\n";
   info += WiFi.softAPIP().toString();
-  info += " ";
+  info += "\n";
   info += WiFi.softAPmacAddress();
-  info += " ";
+  info += "\n";
   info += WiFi.macAddress();
   return info;
 }
